@@ -28,12 +28,12 @@
             <h4 class="text-center mb-4">Register</h4>
             <form method = "POST">
                 <div class="mb-3">
-                    <label for="name" class="form-label">Name</label>
-                    <input type="text" class="form-control" name="name" placeholder="Enter your name" required>
+                    <label for="name" class="form-label">Username</label>
+                    <input type="text" class="form-control" name="username" placeholder="Enter your Username" required>
                 </div>
                 <div class="mb-3">
                     <label for="email" class="form-label">E-Mail</label>
-                    <input type="text" class="form-control" name="email" placeholder="Enter your E-Mail" required>
+                    <input type="text" class="form-control" name="email" placeholder="Enter your E-Mail (Optional)">
                 </div>
                 <div class="mb-3">
                     <label for="password" class="form-label">Password</label>
@@ -45,28 +45,38 @@
                 </div>
             </form>
             <?php
-                if ($_SERVER["REQUEST_METHOD"] == "POST")
+                if($_SERVER["REQUEST_METHOD"] == "POST")
                 {
-                    $name = $_POST['name'];
-                    $email = $_POST['email'];
+                    $username = htmlspecialchars($_POST['username']);
+                    $email = htmlspecialchars($_POST['email']);
                     $pass = $_POST['password'];
 
-                    if (!filter_var($email, FILTER_VALIDATE_EMAIL))
+                    if (!empty($email) && !filter_var($email, FILTER_VALIDATE_EMAIL))
                     {
                         echo "<div class='text-center text-danger mt-3'>Invalid email format.</div>";
                     }
                     else
                     {
-                        $hash = password_hash($pass, PASSWORD_DEFAULT);
-                        $sql = "INSERT INTO user (email, password, name) VALUES ('$email', '$hash', '$name')";
-                        if (mysqli_query($conn, $sql))
+                        $check_query = "SELECT * FROM user WHERE username = '$username'";
+                        $check_result = mysqli_query($conn, $check_query);
+
+                        if(mysqli_num_rows($check_result) > 0)
                         {
-                            echo "<script>alert('Registered Successfully'); window.location.href='../index.php';</script>";
-                            exit();
+                            echo "<div class='text-center text-danger mt-3'>Usernmae is already taken.</div>";
                         }
                         else
                         {
-                            echo "<div class='text-center text-danger mt-3'>Error: " . mysqli_error($conn) . "</div>";
+                            $hash = password_hash($pass, PASSWORD_DEFAULT);
+                            $sql = "INSERT INTO user (email, password, username) VALUES ('$email', '$hash', '$username')";
+                            if (mysqli_query($conn, $sql))
+                            {
+                                echo "<script>alert('Registered Successfully'); window.location.href='../index.php';</script>";
+                                exit();
+                            }
+                            else
+                            {
+                                echo "<div class='text-center text-danger mt-3'>Error: " . mysqli_error($conn) . "</div>";
+                            }
                         }
                     }
                     mysqli_close($conn);

@@ -44,10 +44,10 @@
             <?php
                 if($_SERVER['REQUEST_METHOD'] === 'POST')
                 {
-                    $username = $_POST['username'];
-                    $password = $_POST['password'];
+                    $username = htmlspecialchars($_POST['username']);
+                    $password = htmlspecialchars($_POST['password']);
 
-                    $query = "SELECT * FROM user WHERE name = '$username'";
+                    $query = "SELECT * FROM user WHERE username = '$username'";
                     $result = mysqli_query($conn, $query);
 
                     if(mysqli_num_rows($result) > 0)
